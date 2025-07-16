@@ -1,0 +1,27 @@
+{
+  "name": "blog-fullstack",
+  "version": "1.0.0",
+  "description": "全栈博客项目 - NestJS + Prisma + MySQL + Vue + ElementUI",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd blog-backend && npm run start:dev",
+    "dev:frontend": "cd blog-frontend && npm run dev",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd blog-backend && npm run build",
+    "build:frontend": "cd blog-frontend && npm run build",
+    "install:all": "npm install && cd blog-backend && npm install && cd ../blog-frontend && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "workspaces": [
+    "blog-backend",
+    "blog-frontend"
+  ],
+  "dependencies": {
+    "highlight.js": "^11.11.1",
+    "marked": "^16.0.0",
+    "tsparticles": "^3.8.1",
+    "tsparticles-engine": "^2.12.0"
+  }
+}
