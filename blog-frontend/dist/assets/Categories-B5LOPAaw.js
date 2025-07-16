@@ -1,0 +1,1 @@
+import{d as t,f as o,b as s,s as a,_ as n}from"./index-BXzsnj2W.js";const r={class:"categories"},_=t({__name:"Categories",setup(c){return(p,e)=>(a(),o("div",r,e[0]||(e[0]=[s("h1",null,"分类",-1),s("p",null,"分类页面 - 开发中...",-1)])))}}),l=n(_,[["__scopeId","data-v-577d2c63"]]);export{l as default};

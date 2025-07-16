@@ -1,0 +1,1 @@
+import{d as t,f as a,b as s,s as o,_ as r}from"./index-BXzsnj2W.js";const n={class:"register"},_=t({__name:"Register",setup(c){return(p,e)=>(o(),a("div",n,e[0]||(e[0]=[s("h1",null,"用户注册",-1),s("p",null,"注册页面 - 开发中...",-1)])))}}),d=r(_,[["__scopeId","data-v-1ca6a085"]]);export{d as default};

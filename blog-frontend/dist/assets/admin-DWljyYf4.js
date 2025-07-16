@@ -1,0 +1,1 @@
+import{am as r}from"./index-BXzsnj2W.js";const u={getStats(){return r.get("/admin/stats")},getUsers(e={}){return r.get("/users",{params:e})},createUser(e){return r.post("/users",e)},updateUser(e,t){return r.patch(`/users/${e}`,t)},deleteUser(e){return r.delete(`/users/${e}`)},getUserById(e){return r.get(`/users/${e}`)},getRoles(){return r.get("/roles")}};export{u as a};

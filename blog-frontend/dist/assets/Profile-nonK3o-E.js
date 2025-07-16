@@ -1,0 +1,1 @@
+import{d as s,f as t,b as o,s as a,_ as n}from"./index-BXzsnj2W.js";const r={class:"profile"},_=s({__name:"Profile",setup(l){return(p,e)=>(a(),t("div",r,e[0]||(e[0]=[o("h1",null,"个人资料",-1),o("p",null,"个人资料页面 - 开发中...",-1)])))}}),f=n(_,[["__scopeId","data-v-8a9efab3"]]);export{f as default};

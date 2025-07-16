@@ -1,0 +1,1 @@
+import{am as t}from"./index-BXzsnj2W.js";const o={getList:()=>t.get("/categories"),getById:e=>t.get(`/categories/${e}`),create:e=>t.post("/categories",e),update:(e,a)=>t.patch(`/categories/${e}`,a),delete:e=>t.delete(`/categories/${e}`)};export{o as c};

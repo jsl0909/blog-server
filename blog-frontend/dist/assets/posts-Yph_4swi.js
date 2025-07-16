@@ -1,0 +1,1 @@
+import{am as e}from"./index-BXzsnj2W.js";const o={getList:t=>e.get("/posts",{params:t}),getById:t=>e.get(`/posts/${t}`),create:t=>e.post("/posts",t),update:(t,s)=>e.patch(`/posts/${t}`,s),delete:t=>e.delete(`/posts/${t}`),batchDelete:t=>e.post("/posts/batch-delete",{ids:t})};export{o as p};

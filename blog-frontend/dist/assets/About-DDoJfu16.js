@@ -1,0 +1,1 @@
+import{d as o,f as s,b as t,s as a,_ as n}from"./index-BXzsnj2W.js";const _={class:"about"},r=o({__name:"About",setup(c){return(p,e)=>(a(),s("div",_,e[0]||(e[0]=[t("h1",null,"关于",-1),t("p",null,"关于页面 - 开发中...",-1)])))}}),u=n(r,[["__scopeId","data-v-2e9f491e"]]);export{u as default};

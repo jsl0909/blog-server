@@ -1,0 +1,1 @@
+import{d as t,f as a,b as e,s as o,_ as n}from"./index-BXzsnj2W.js";const _={class:"tags"},c=t({__name:"Tags",setup(r){return(p,s)=>(o(),a("div",_,s[0]||(s[0]=[e("h1",null,"标签",-1),e("p",null,"标签页面 - 开发中...",-1)])))}}),d=n(c,[["__scopeId","data-v-72c0233e"]]);export{d as default};

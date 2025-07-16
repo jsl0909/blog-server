@@ -1,0 +1,1 @@
+import{am as e}from"./index-BXzsnj2W.js";const g={getList:()=>e.get("/tags"),getById:t=>e.get(`/tags/${t}`),create:t=>e.post("/tags",t),update:(t,a)=>e.patch(`/tags/${t}`,a),delete:t=>e.delete(`/tags/${t}`)};export{g as t};
