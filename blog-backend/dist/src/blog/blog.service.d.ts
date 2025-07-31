@@ -8,6 +8,7 @@ export declare class BlogService {
         category?: string;
         tag?: string;
         search?: string;
+        userId?: number;
     }): Promise<{
         posts: {
             id: number;
@@ -34,6 +35,8 @@ export declare class BlogService {
             }[];
             commentCount: number;
             excerpt: string;
+            status: import(".prisma/client").$Enums.PostStatus;
+            isOwnPost: boolean;
         }[];
         total: number;
         page: number;
@@ -48,14 +51,7 @@ export declare class BlogService {
         }[];
         commentCount: number;
         isLiked: boolean;
-        _count: {
-            comments: number;
-            likes: number;
-        };
-        category: {
-            id: number;
-            name: string;
-        };
+        isOwnPost: boolean;
         author: {
             id: number;
             username: string;
@@ -63,19 +59,27 @@ export declare class BlogService {
             avatar: string;
             bio: string;
         };
+        category: {
+            id: number;
+            name: string;
+        };
+        _count: {
+            comments: number;
+            likes: number;
+        };
         id: number;
-        createdAt: Date;
-        updatedAt: Date;
-        status: import(".prisma/client").$Enums.PostStatus;
         title: string;
-        summary: string | null;
         content: string;
-        categoryId: number | null;
+        summary: string | null;
         coverImage: string | null;
+        status: import(".prisma/client").$Enums.PostStatus;
         viewCount: number;
         likeCount: number;
         authorId: number;
+        categoryId: number | null;
         publishedAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     getCategories(): Promise<{
         id: number;
@@ -99,6 +103,7 @@ export declare class BlogService {
         id: number;
         title: string;
         summary: string;
+        excerpt: string;
         publishedAt: Date;
         viewCount: number;
         likeCount: number;
@@ -116,8 +121,10 @@ export declare class BlogService {
         id: number;
         title: string;
         summary: string;
+        excerpt: string;
         publishedAt: Date;
         viewCount: number;
+        likeCount: number;
         author: {
             id: number;
             username: string;
@@ -152,24 +159,24 @@ export declare class BlogService {
                 };
             } & {
                 id: number;
-                createdAt: Date;
-                updatedAt: Date;
-                status: import(".prisma/client").$Enums.CommentStatus;
-                parentId: number | null;
                 content: string;
+                status: import(".prisma/client").$Enums.CommentStatus;
                 likeCount: number;
                 authorId: number;
+                createdAt: Date;
+                updatedAt: Date;
+                parentId: number | null;
                 postId: number;
             })[];
         } & {
             id: number;
-            createdAt: Date;
-            updatedAt: Date;
-            status: import(".prisma/client").$Enums.CommentStatus;
-            parentId: number | null;
             content: string;
+            status: import(".prisma/client").$Enums.CommentStatus;
             likeCount: number;
             authorId: number;
+            createdAt: Date;
+            updatedAt: Date;
+            parentId: number | null;
             postId: number;
         })[];
         total: number;
@@ -190,13 +197,13 @@ export declare class BlogService {
         };
     } & {
         id: number;
-        createdAt: Date;
-        updatedAt: Date;
-        status: import(".prisma/client").$Enums.CommentStatus;
-        parentId: number | null;
         content: string;
+        status: import(".prisma/client").$Enums.CommentStatus;
         likeCount: number;
         authorId: number;
+        createdAt: Date;
+        updatedAt: Date;
+        parentId: number | null;
         postId: number;
     }>;
     getArchive(): Promise<{}>;

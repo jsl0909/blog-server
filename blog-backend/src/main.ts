@@ -1,8 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+
+@Catch()
+class AllExceptionsFilter implements ExceptionFilter {
+  catch(exception: any, host: ArgumentsHost) {
+    // eslint-disable-next-line no-console
+    console.error('全局异常日志:', exception);
+    throw exception;
+  }
+}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,6 +25,9 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  // 全局异常日志
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   // CORS 配置
   app.enableCors({

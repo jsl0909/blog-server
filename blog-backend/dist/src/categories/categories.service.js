@@ -22,6 +22,9 @@ let CategoriesService = class CategoriesService {
     async findOne(id) {
         return this.prisma.category.findUnique({ where: { id } });
     }
+    async findByName(name) {
+        return this.prisma.category.findUnique({ where: { name } });
+    }
     async create(data) {
         return this.prisma.category.create({ data });
     }

@@ -1,5 +1,6 @@
 import axios from 'axios'
 import type { PostsResponse, BlogPost, LikeResponse, Category, Tag, CommentsResponse, SiteStats } from '@/types/api'
+import { uploadAPI } from './upload'
 
 // 创建axios实例
 const api = axios.create({
@@ -154,4 +155,5 @@ export const adminApi = {
     api.delete(`/api/tags/${id}`)
 }
 
+export { uploadAPI }
 export default api 

@@ -222,6 +222,7 @@ const loadTags = async () => {
 onMounted(() => {
   loadCategories()
   loadTags()
+  console.log('CreatePost页面已加载')
 })
 </script>
 

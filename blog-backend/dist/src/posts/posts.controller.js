@@ -30,10 +30,12 @@ let PostsController = class PostsController {
         const userId = req.user.id;
         return this.postsService.create({ ...createPostDto, userId });
     }
-    update(id, updatePostDto) {
-        return this.postsService.update(+id, updatePostDto);
+    update(id, updatePostDto, req) {
+        const userId = req.user.id;
+        return this.postsService.update(+id, { ...updatePostDto, userId });
     }
-    remove(id) {
+    remove(id, req) {
+        const userId = req.user.id;
         return this.postsService.remove(+id);
     }
 };
@@ -63,17 +65,21 @@ __decorate([
 ], PostsController.prototype, "create", null);
 __decorate([
     (0, common_1.Patch)(':id'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", void 0)
 ], PostsController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], PostsController.prototype, "remove", null);
 exports.PostsController = PostsController = __decorate([

@@ -10,11 +10,15 @@ exports.UploadModule = void 0;
 const common_1 = require("@nestjs/common");
 const upload_service_1 = require("./upload.service");
 const upload_controller_1 = require("./upload.controller");
+const posts_module_1 = require("../posts/posts.module");
+const tags_module_1 = require("../tags/tags.module");
+const categories_module_1 = require("../categories/categories.module");
 let UploadModule = class UploadModule {
 };
 exports.UploadModule = UploadModule;
 exports.UploadModule = UploadModule = __decorate([
     (0, common_1.Module)({
+        imports: [posts_module_1.PostsModule, tags_module_1.TagsModule, categories_module_1.CategoriesModule],
         controllers: [upload_controller_1.UploadController],
         providers: [upload_service_1.UploadService],
     })

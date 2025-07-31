@@ -3,58 +3,49 @@ export declare class PostsController {
     private readonly postsService;
     constructor(postsService: PostsService);
     findAll(query: any): Promise<{
-        posts: ({
-            category: {
-                id: number;
-                name: string;
-            };
-            tags: {
-                tag: {
-                    id: number;
-                    name: string;
-                };
-            }[];
+        posts: {
+            id: number;
+            title: string;
+            summary: string;
+            coverImage: string;
+            publishedAt: Date;
+            viewCount: number;
+            likeCount: number;
             author: {
                 id: number;
                 username: string;
                 nickname: string;
             };
-        } & {
-            id: number;
+            category: {
+                id: number;
+                name: string;
+            };
+            tags: {
+                id: number;
+                name: string;
+            }[];
+            status: import(".prisma/client").$Enums.PostStatus;
             createdAt: Date;
             updatedAt: Date;
-            status: import(".prisma/client").$Enums.PostStatus;
-            title: string;
-            summary: string | null;
-            content: string;
-            categoryId: number | null;
-            coverImage: string | null;
-            viewCount: number;
-            likeCount: number;
-            authorId: number;
-            publishedAt: Date | null;
-        })[];
+        }[];
         total: number;
         page: number;
         limit: number;
     }>;
     findOne(id: string): Promise<{
+        tags: {
+            id: number;
+            name: string;
+        }[];
         category: {
             id: number;
             name: string;
         };
-        tags: {
-            tag: {
-                id: number;
-                name: string;
-            };
-        }[];
         author: {
             id: number;
             username: string;
             nickname: string;
         };
-    } & {
         id: number;
         createdAt: Date;
         updatedAt: Date;
@@ -84,7 +75,7 @@ export declare class PostsController {
         authorId: number;
         publishedAt: Date | null;
     }>;
-    update(id: string, updatePostDto: any): Promise<{
+    update(id: string, updatePostDto: any, req: any): Promise<{
         id: number;
         createdAt: Date;
         updatedAt: Date;
@@ -99,7 +90,7 @@ export declare class PostsController {
         authorId: number;
         publishedAt: Date | null;
     }>;
-    remove(id: string): Promise<{
+    remove(id: string, req: any): Promise<{
         id: number;
         createdAt: Date;
         updatedAt: Date;

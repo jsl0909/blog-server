@@ -22,10 +22,22 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '文章列表' }
       },
       {
-        path: '/posts/:id',
+        path: '/posts/:id(\\d+)',
         name: 'PostDetail',
         component: () => import('@/views/PostDetail.vue'),
         meta: { title: '文章详情' }
+      },
+      {
+        path: '/edit',
+        name: 'EditArticle',
+        component: () => import('@/views/EditArticle.vue'),
+        meta: { title: '编辑文章', requiresAuth: true }
+      },
+      {
+        path: '/edit/:id',
+        name: 'EditArticleById',
+        component: () => import('@/views/EditArticle.vue'),
+        meta: { title: '编辑文章', requiresAuth: true }
       },
       {
         path: '/categories',
@@ -44,6 +56,18 @@ const routes: RouteRecordRaw[] = [
         name: 'About',
         component: () => import('@/views/About.vue'),
         meta: { title: '关于' }
+      },
+      {
+        path: '/photos',
+        name: 'Photos',
+        component: () => import('@/views/Photos.vue'),
+        meta: { title: '相册' }
+      },
+      {
+        path: '/links',
+        name: 'Links',
+        component: () => import('@/views/Links.vue'),
+        meta: { title: '友情链接' }
       }
     ]
   },
@@ -89,6 +113,12 @@ const routes: RouteRecordRaw[] = [
         name: 'CreatePost',
         component: () => import('@/views/admin/CreatePost.vue'),
         meta: { title: '创建文章' }
+      },
+      {
+        path: 'posts/upload-markdown',
+        name: 'MarkdownUpload',
+        component: () => import('@/views/admin/MarkdownUpload.vue'),
+        meta: { title: '上传Markdown文件' }
       },
       {
         path: 'posts/edit/:id',

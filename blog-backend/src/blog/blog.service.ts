@@ -5,16 +5,24 @@ import { PrismaService } from '../prisma/prisma.service';
 export class BlogService {
   constructor(private prisma: PrismaService) {}
 
-  // 获取已发布的文章列表
+  // 获取文章列表（支持权限隔离）
   async getPublishedPosts(options: {
     page: number;
     limit: number;
     category?: string;
     tag?: string;
     search?: string;
+    userId?: number; // 添加用户ID参数
   }) {
-    const { page, limit, category, tag, search } = options;
-    const where: any = { status: 'PUBLISHED' };
+    const { page, limit, category, tag, search, userId } = options;
+    
+    // 构建查询条件：已发布的文章 + 用户自己的文章（包括未发布的）
+    const where: any = {
+      OR: [
+        { status: 'PUBLISHED' }, // 已发布的文章
+        ...(userId ? [{ authorId: userId }] : []) // 用户自己的文章（包括未发布的）
+      ]
+    };
 
     // 分类过滤
     if (category) {
@@ -80,7 +88,9 @@ export class BlogService {
       category: post.category,
       tags: post.tags.map(pt => pt.tag),
       commentCount: post._count.comments,
-      excerpt: post.summary || post.content.substring(0, 200) + '...'
+      excerpt: post.summary || post.content.substring(0, 200) + '...',
+      status: post.status, // 添加状态字段
+      isOwnPost: userId ? post.author.id === userId : false // 添加是否为自己的文章标识
     }));
 
     return {
@@ -92,16 +102,46 @@ export class BlogService {
     };
   }
 
-  // 获取文章详情
+  // 获取文章详情（支持权限隔离）
   async getPostDetail(id: number, userId?: number) {
-    // 增加浏览量
-    await this.prisma.post.update({
-      where: { id },
-      data: { viewCount: { increment: 1 } }
+    // 验证id参数
+    if (!id || isNaN(id)) {
+      throw new Error('无效的文章ID');
+    }
+
+    const postId = Number(id);
+    console.log('Updating view count for post ID:', postId);
+
+    // 首先检查文章是否存在
+    const existingPost = await this.prisma.post.findUnique({
+      where: { id: postId }
     });
 
+    if (!existingPost) {
+      throw new Error('文章不存在');
+    }
+
+    // 检查访问权限：已发布的文章或用户自己的文章
+    const canAccess = existingPost.status === 'PUBLISHED' || 
+                     (userId && existingPost.authorId === userId);
+    
+    if (!canAccess) {
+      throw new Error('文章不存在或无权限访问');
+    }
+
+    try {
+      // 增加浏览量
+      await this.prisma.post.update({
+        where: { id: postId },
+        data: { viewCount: { increment: 1 } }
+      });
+    } catch (error) {
+      console.error('Failed to update view count for post ID:', postId, error);
+      // 如果更新失败，继续执行，不中断整个流程
+    }
+
     const post = await this.prisma.post.findUnique({
-      where: { id, status: 'PUBLISHED' },
+      where: { id: postId },
       include: {
         author: {
           select: { id: true, username: true, nickname: true, avatar: true, bio: true }
@@ -129,7 +169,7 @@ export class BlogService {
     if (userId) {
       const like = await this.prisma.like.findUnique({
         where: {
-          userId_postId: { userId, postId: id }
+          userId_postId: { userId, postId: postId }
         }
       });
       isLiked = !!like;
@@ -139,7 +179,8 @@ export class BlogService {
       ...post,
       tags: post.tags.map(pt => pt.tag),
       commentCount: post._count.comments,
-      isLiked
+      isLiked,
+      isOwnPost: userId ? post.author.id === userId : false // 添加是否为自己的文章标识
     };
   }
 
@@ -225,9 +266,10 @@ export class BlogService {
       id: post.id,
       title: post.title,
       summary: post.summary,
+      excerpt: post.summary, // 添加excerpt字段，使用summary作为摘要
       publishedAt: post.publishedAt,
       viewCount: post.viewCount,
-      likeCount: post.likeCount,
+      likeCount: post.likeCount || 0,
       author: post.author,
       category: post.category
     }));
@@ -235,6 +277,8 @@ export class BlogService {
 
   // 获取最新文章
   async getLatestPosts(limit = 5) {
+    console.log('Getting latest posts with limit:', limit);
+    
     const posts = await this.prisma.post.findMany({
       where: { status: 'PUBLISHED' },
       orderBy: { publishedAt: 'desc' },
@@ -249,12 +293,16 @@ export class BlogService {
       }
     });
 
+    console.log('Found posts:', posts.length, 'posts:', posts.map(p => ({ id: p.id, title: p.title })));
+
     return posts.map(post => ({
       id: post.id,
       title: post.title,
       summary: post.summary,
+      excerpt: post.summary, // 添加excerpt字段，使用summary作为摘要
       publishedAt: post.publishedAt,
       viewCount: post.viewCount,
+      likeCount: post.likeCount || 0, // 添加likeCount字段
       author: post.author,
       category: post.category
     }));

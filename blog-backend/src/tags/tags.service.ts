@@ -13,6 +13,10 @@ export class TagsService {
     return this.prisma.tag.findUnique({ where: { id } });
   }
 
+  async findByName(name: string) {
+    return this.prisma.tag.findUnique({ where: { name } });
+  }
+
   async create(data: any) {
     return this.prisma.tag.create({ data });
   }

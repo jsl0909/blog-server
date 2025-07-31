@@ -211,6 +211,7 @@ const formatDate = (date: string) => {
 // 初始化
 onMounted(() => {
   loadTags()
+  console.log('Tags页面已加载')
 })
 </script>
 

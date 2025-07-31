@@ -60,7 +60,7 @@ export class UsersService {
     const { password, ...result } = user;
     return {
       ...result,
-      roles: [result.role], // 转换为数组格式以保持API一致性
+      roles: [{ ...result.role, name: result.role.name.toUpperCase() }], // 角色名大写
     };
   }
 
@@ -110,7 +110,7 @@ export class UsersService {
       return {
         ...userWithoutPassword,
         status: userWithoutPassword.status.toLowerCase(),
-        roles: [userWithoutPassword.role], // 转换为数组格式
+        roles: [{ ...userWithoutPassword.role, name: userWithoutPassword.role.name.toUpperCase() }], // 角色名大写
       };
     });
 
@@ -145,7 +145,7 @@ export class UsersService {
     return {
       ...result,
       status: result.status.toLowerCase(),
-      roles: [result.role], // 转换为数组格式
+      roles: [{ ...result.role, name: result.role.name.toUpperCase() }], // 角色名大写
     };
   }
 
@@ -199,8 +199,7 @@ export class UsersService {
     const { password, ...result } = updatedUser;
     return {
       ...result,
-      status: result.status.toLowerCase(),
-      roles: [result.role], // 转换为数组格式
+      roles: [{ ...result.role, name: result.role.name.toUpperCase() }], // 角色名大写
     };
   }
 

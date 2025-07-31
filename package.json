@@ -19,8 +19,18 @@
     "blog-frontend"
   ],
   "dependencies": {
+    "@milkdown/core": "^7.15.1",
+    "@milkdown/plugin-clipboard": "^7.15.1",
+    "@milkdown/plugin-history": "^7.15.1",
+    "@milkdown/plugin-listener": "^7.15.1",
+    "@milkdown/plugin-prism": "^7.15.1",
+    "@milkdown/plugin-tooltip": "^7.15.1",
+    "@milkdown/preset-gfm": "^7.15.1",
+    "@milkdown/theme-nord": "^7.15.1",
+    "@milkdown/vue": "^7.15.1",
     "highlight.js": "^11.11.1",
     "marked": "^16.0.0",
+    "prismjs": "^1.30.0",
     "tsparticles": "^3.8.1",
     "tsparticles-engine": "^2.12.0"
   }

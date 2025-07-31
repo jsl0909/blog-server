@@ -6,8 +6,8 @@ export declare class UsersController {
     constructor(usersService: UsersService);
     create(createUserDto: CreateUserDto): Promise<{
         roles: {
-            id: number;
             name: string;
+            id: number;
             description: string | null;
             createdAt: Date;
             updatedAt: Date;
@@ -35,8 +35,8 @@ export declare class UsersController {
         users: {
             status: string;
             roles: {
-                id: number;
                 name: string;
+                id: number;
                 description: string | null;
                 createdAt: Date;
                 updatedAt: Date;
@@ -71,8 +71,8 @@ export declare class UsersController {
     getProfile(req: any): Promise<{
         status: string;
         roles: {
-            id: number;
             name: string;
+            id: number;
             description: string | null;
             createdAt: Date;
             updatedAt: Date;
@@ -102,8 +102,8 @@ export declare class UsersController {
     findOne(id: string): Promise<{
         status: string;
         roles: {
-            id: number;
             name: string;
+            id: number;
             description: string | null;
             createdAt: Date;
             updatedAt: Date;
@@ -131,10 +131,9 @@ export declare class UsersController {
         lastLoginAt: Date | null;
     }>;
     update(id: string, updateUserDto: UpdateUserDto): Promise<{
-        status: string;
         roles: {
-            id: number;
             name: string;
+            id: number;
             description: string | null;
             createdAt: Date;
             updatedAt: Date;
@@ -155,6 +154,7 @@ export declare class UsersController {
         nickname: string | null;
         avatar: string | null;
         bio: string | null;
+        status: import(".prisma/client").$Enums.UserStatus;
         lastLoginAt: Date | null;
     }>;
     remove(id: string): Promise<{

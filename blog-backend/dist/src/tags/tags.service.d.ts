@@ -16,6 +16,13 @@ export declare class TagsService {
         updatedAt: Date;
         color: string | null;
     }>;
+    findByName(name: string): Promise<{
+        id: number;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        color: string | null;
+    }>;
     create(data: any): Promise<{
         id: number;
         name: string;

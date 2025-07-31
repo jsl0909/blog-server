@@ -11,8 +11,8 @@ export declare class JwtStrategy extends JwtStrategy_base {
         email: string;
         username: string;
         roles: {
-            id: number;
             name: string;
+            id: number;
             description: string | null;
             createdAt: Date;
             updatedAt: Date;

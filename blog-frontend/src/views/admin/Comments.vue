@@ -345,6 +345,7 @@ const formatDate = (date: string) => {
 // 初始化
 onMounted(() => {
   loadComments()
+  console.log('Comments页面已加载')
 })
 </script>
 

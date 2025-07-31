@@ -64,8 +64,8 @@
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="row.status?.toLowerCase() === 'published' ? 'success' : 'warning'">
-              {{ row.status?.toLowerCase() === 'published' ? '已发布' : '草稿' }}
+            <el-tag :type="row.status === 'PUBLISHED' ? 'success' : 'warning'">
+              {{ row.status === 'PUBLISHED' ? '已发布' : '草稿' }}
             </el-tag>
           </template>
         </el-table-column>
@@ -82,7 +82,7 @@
         <el-table-column prop="tags" label="标签" width="150">
           <template #default="{ row }">
             <el-tag
-              v-for="tag in (row.tags || []).map((t: any) => t.tag || t)"
+              v-for="tag in (row.tags || []).map((t: any) => t.tag ? t.tag : t)"
               :key="tag.id"
               size="small"
               style="margin-right: 5px;"
@@ -215,8 +215,12 @@ const handleCreate = () => {
 }
 
 // 编辑文章
-const handleEdit = (post: Post) => {
-  router.push(`/admin/posts/edit/${post.id}`)
+const handleEdit = (row: any) => {
+  if (!row.id) {
+    ElMessage.error('文章ID不存在，无法编辑')
+    return
+  }
+  router.push({ name: 'EditPost', params: { id: row.id } })
 }
 
 // 预览文章
@@ -277,6 +281,7 @@ const formatDate = (date: string) => {
 // 初始化
 onMounted(() => {
   loadPosts()
+  console.log('Posts页面已加载')
 })
 </script>
 

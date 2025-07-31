@@ -17,8 +17,13 @@ let BlogService = class BlogService {
         this.prisma = prisma;
     }
     async getPublishedPosts(options) {
-        const { page, limit, category, tag, search } = options;
-        const where = { status: 'PUBLISHED' };
+        const { page, limit, category, tag, search, userId } = options;
+        const where = {
+            OR: [
+                { status: 'PUBLISHED' },
+                ...(userId ? [{ authorId: userId }] : [])
+            ]
+        };
         if (category) {
             where.category = { name: category };
         }
@@ -74,7 +79,9 @@ let BlogService = class BlogService {
             category: post.category,
             tags: post.tags.map(pt => pt.tag),
             commentCount: post._count.comments,
-            excerpt: post.summary || post.content.substring(0, 200) + '...'
+            excerpt: post.summary || post.content.substring(0, 200) + '...',
+            status: post.status,
+            isOwnPost: userId ? post.author.id === userId : false
         }));
         return {
             posts: formattedPosts,
@@ -85,12 +92,33 @@ let BlogService = class BlogService {
         };
     }
     async getPostDetail(id, userId) {
-        await this.prisma.post.update({
-            where: { id },
-            data: { viewCount: { increment: 1 } }
+        if (!id || isNaN(id)) {
+            throw new Error('无效的文章ID');
+        }
+        const postId = Number(id);
+        console.log('Updating view count for post ID:', postId);
+        const existingPost = await this.prisma.post.findUnique({
+            where: { id: postId }
         });
+        if (!existingPost) {
+            throw new Error('文章不存在');
+        }
+        const canAccess = existingPost.status === 'PUBLISHED' ||
+            (userId && existingPost.authorId === userId);
+        if (!canAccess) {
+            throw new Error('文章不存在或无权限访问');
+        }
+        try {
+            await this.prisma.post.update({
+                where: { id: postId },
+                data: { viewCount: { increment: 1 } }
+            });
+        }
+        catch (error) {
+            console.error('Failed to update view count for post ID:', postId, error);
+        }
         const post = await this.prisma.post.findUnique({
-            where: { id, status: 'PUBLISHED' },
+            where: { id: postId },
             include: {
                 author: {
                     select: { id: true, username: true, nickname: true, avatar: true, bio: true }
@@ -115,7 +143,7 @@ let BlogService = class BlogService {
         if (userId) {
             const like = await this.prisma.like.findUnique({
                 where: {
-                    userId_postId: { userId, postId: id }
+                    userId_postId: { userId, postId: postId }
                 }
             });
             isLiked = !!like;
@@ -124,7 +152,8 @@ let BlogService = class BlogService {
             ...post,
             tags: post.tags.map(pt => pt.tag),
             commentCount: post._count.comments,
-            isLiked
+            isLiked,
+            isOwnPost: userId ? post.author.id === userId : false
         };
     }
     async getCategories() {
@@ -198,14 +227,16 @@ let BlogService = class BlogService {
             id: post.id,
             title: post.title,
             summary: post.summary,
+            excerpt: post.summary,
             publishedAt: post.publishedAt,
             viewCount: post.viewCount,
-            likeCount: post.likeCount,
+            likeCount: post.likeCount || 0,
             author: post.author,
             category: post.category
         }));
     }
     async getLatestPosts(limit = 5) {
+        console.log('Getting latest posts with limit:', limit);
         const posts = await this.prisma.post.findMany({
             where: { status: 'PUBLISHED' },
             orderBy: { publishedAt: 'desc' },
@@ -219,12 +250,15 @@ let BlogService = class BlogService {
                 }
             }
         });
+        console.log('Found posts:', posts.length, 'posts:', posts.map(p => ({ id: p.id, title: p.title })));
         return posts.map(post => ({
             id: post.id,
             title: post.title,
             summary: post.summary,
+            excerpt: post.summary,
             publishedAt: post.publishedAt,
             viewCount: post.viewCount,
+            likeCount: post.likeCount || 0,
             author: post.author,
             category: post.category
         }));

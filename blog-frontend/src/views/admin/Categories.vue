@@ -216,6 +216,7 @@ const formatDate = (date: string) => {
 // 初始化
 onMounted(() => {
   loadCategories()
+  console.log('Categories页面已加载')
 })
 </script>
 

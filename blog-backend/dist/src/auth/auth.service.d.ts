@@ -16,8 +16,8 @@ export declare class AuthService {
             nickname: string;
             avatar: string;
             roles: {
-                id: number;
                 name: string;
+                id: number;
                 description: string | null;
                 createdAt: Date;
                 updatedAt: Date;
@@ -33,8 +33,8 @@ export declare class AuthService {
             nickname: string;
             avatar: string;
             roles: {
-                id: number;
                 name: string;
+                id: number;
                 description: string | null;
                 createdAt: Date;
                 updatedAt: Date;

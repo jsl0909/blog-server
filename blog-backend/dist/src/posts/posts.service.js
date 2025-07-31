@@ -57,15 +57,30 @@ let PostsService = class PostsService {
             this.prisma.post.count({ where })
         ]);
         console.log('查询结果:', { posts: posts.length, total });
+        const formattedPosts = posts.map(post => ({
+            id: post.id,
+            title: post.title,
+            summary: post.summary,
+            coverImage: post.coverImage,
+            publishedAt: post.publishedAt,
+            viewCount: post.viewCount,
+            likeCount: post.likeCount,
+            author: post.author,
+            category: post.category,
+            tags: post.tags.map(pt => pt.tag),
+            status: post.status,
+            createdAt: post.createdAt,
+            updatedAt: post.updatedAt
+        }));
         return {
-            posts,
+            posts: formattedPosts,
             total,
             page: Number(page),
             limit: Number(limit)
         };
     }
     async findOne(id) {
-        return this.prisma.post.findUnique({
+        const post = await this.prisma.post.findUnique({
             where: { id },
             include: {
                 author: {
@@ -81,6 +96,12 @@ let PostsService = class PostsService {
                 }
             }
         });
+        if (!post)
+            return null;
+        return {
+            ...post,
+            tags: post.tags.map(pt => pt.tag)
+        };
     }
     async create(data) {
         const { userId, title, content, summary, coverImage, status, viewCount, likeCount, categoryId, publishedAt, tagIds } = data;
@@ -103,8 +124,9 @@ let PostsService = class PostsService {
             postData.viewCount = viewCount;
         if (likeCount !== undefined)
             postData.likeCount = likeCount;
-        if (categoryId !== undefined)
-            postData.categoryId = categoryId;
+        if (categoryId !== undefined && categoryId !== null) {
+            postData.category = { connect: { id: categoryId } };
+        }
         if (publishedAt !== undefined)
             postData.publishedAt = publishedAt;
         const post = await this.prisma.post.create({ data: postData });
@@ -133,8 +155,9 @@ let PostsService = class PostsService {
             postData.viewCount = viewCount;
         if (likeCount !== undefined)
             postData.likeCount = likeCount;
-        if (categoryId !== undefined)
-            postData.categoryId = categoryId;
+        if (categoryId !== undefined && categoryId !== null) {
+            postData.category = { connect: { id: categoryId } };
+        }
         if (publishedAt !== undefined)
             postData.publishedAt = publishedAt;
         const post = await this.prisma.post.update({ where: { id }, data: postData });

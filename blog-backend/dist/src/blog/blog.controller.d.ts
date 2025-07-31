@@ -2,7 +2,7 @@ import { BlogService } from './blog.service';
 export declare class BlogController {
     private readonly blogService;
     constructor(blogService: BlogService);
-    getPosts(query: any): Promise<{
+    getPosts(query: any, req: any): Promise<{
         posts: {
             id: number;
             title: string;
@@ -28,48 +28,13 @@ export declare class BlogController {
             }[];
             commentCount: number;
             excerpt: string;
+            status: import(".prisma/client").$Enums.PostStatus;
+            isOwnPost: boolean;
         }[];
         total: number;
         page: number;
         limit: number;
         totalPages: number;
-    }>;
-    getPost(id: string, req: any): Promise<{
-        tags: {
-            id: number;
-            name: string;
-            color: string;
-        }[];
-        commentCount: number;
-        isLiked: boolean;
-        _count: {
-            comments: number;
-            likes: number;
-        };
-        category: {
-            id: number;
-            name: string;
-        };
-        author: {
-            id: number;
-            username: string;
-            nickname: string;
-            avatar: string;
-            bio: string;
-        };
-        id: number;
-        createdAt: Date;
-        updatedAt: Date;
-        status: import(".prisma/client").$Enums.PostStatus;
-        title: string;
-        summary: string | null;
-        content: string;
-        categoryId: number | null;
-        coverImage: string | null;
-        viewCount: number;
-        likeCount: number;
-        authorId: number;
-        publishedAt: Date | null;
     }>;
     getCategories(): Promise<{
         id: number;
@@ -93,6 +58,7 @@ export declare class BlogController {
         id: number;
         title: string;
         summary: string;
+        excerpt: string;
         publishedAt: Date;
         viewCount: number;
         likeCount: number;
@@ -110,8 +76,10 @@ export declare class BlogController {
         id: number;
         title: string;
         summary: string;
+        excerpt: string;
         publishedAt: Date;
         viewCount: number;
+        likeCount: number;
         author: {
             id: number;
             username: string;
@@ -122,6 +90,44 @@ export declare class BlogController {
             name: string;
         };
     }[]>;
+    getPost(id: string, req: any): Promise<{
+        tags: {
+            id: number;
+            name: string;
+            color: string;
+        }[];
+        commentCount: number;
+        isLiked: boolean;
+        isOwnPost: boolean;
+        author: {
+            id: number;
+            username: string;
+            nickname: string;
+            avatar: string;
+            bio: string;
+        };
+        category: {
+            id: number;
+            name: string;
+        };
+        _count: {
+            comments: number;
+            likes: number;
+        };
+        id: number;
+        title: string;
+        content: string;
+        summary: string | null;
+        coverImage: string | null;
+        status: import(".prisma/client").$Enums.PostStatus;
+        viewCount: number;
+        likeCount: number;
+        authorId: number;
+        categoryId: number | null;
+        publishedAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
     likePost(id: string, req: any): Promise<{
         liked: boolean;
         message: string;
@@ -143,24 +149,24 @@ export declare class BlogController {
                 };
             } & {
                 id: number;
-                createdAt: Date;
-                updatedAt: Date;
-                status: import(".prisma/client").$Enums.CommentStatus;
-                parentId: number | null;
                 content: string;
+                status: import(".prisma/client").$Enums.CommentStatus;
                 likeCount: number;
                 authorId: number;
+                createdAt: Date;
+                updatedAt: Date;
+                parentId: number | null;
                 postId: number;
             })[];
         } & {
             id: number;
-            createdAt: Date;
-            updatedAt: Date;
-            status: import(".prisma/client").$Enums.CommentStatus;
-            parentId: number | null;
             content: string;
+            status: import(".prisma/client").$Enums.CommentStatus;
             likeCount: number;
             authorId: number;
+            createdAt: Date;
+            updatedAt: Date;
+            parentId: number | null;
             postId: number;
         })[];
         total: number;
@@ -177,13 +183,13 @@ export declare class BlogController {
         };
     } & {
         id: number;
-        createdAt: Date;
-        updatedAt: Date;
-        status: import(".prisma/client").$Enums.CommentStatus;
-        parentId: number | null;
         content: string;
+        status: import(".prisma/client").$Enums.CommentStatus;
         likeCount: number;
         authorId: number;
+        createdAt: Date;
+        updatedAt: Date;
+        parentId: number | null;
         postId: number;
     }>;
     getArchive(): Promise<{}>;

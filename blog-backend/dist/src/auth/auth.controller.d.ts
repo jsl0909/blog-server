@@ -13,8 +13,8 @@ export declare class AuthController {
             nickname: string;
             avatar: string;
             roles: {
-                id: number;
                 name: string;
+                id: number;
                 description: string | null;
                 createdAt: Date;
                 updatedAt: Date;
@@ -30,8 +30,8 @@ export declare class AuthController {
             nickname: string;
             avatar: string;
             roles: {
-                id: number;
                 name: string;
+                id: number;
                 description: string | null;
                 createdAt: Date;
                 updatedAt: Date;

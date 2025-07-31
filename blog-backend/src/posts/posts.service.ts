@@ -57,8 +57,24 @@ export class PostsService {
     
     console.log('查询结果:', { posts: posts.length, total });
     
+    // 格式化返回，确保有 status 字段
+    const formattedPosts = posts.map(post => ({
+      id: post.id,
+      title: post.title,
+      summary: post.summary,
+      coverImage: post.coverImage,
+      publishedAt: post.publishedAt,
+      viewCount: post.viewCount,
+      likeCount: post.likeCount,
+      author: post.author,
+      category: post.category,
+      tags: post.tags.map(pt => pt.tag),
+      status: post.status, // 保证有 status 字段
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt
+    }));
     return {
-      posts,
+      posts: formattedPosts,
       total,
       page: Number(page),
       limit: Number(limit)
@@ -66,7 +82,7 @@ export class PostsService {
   }
 
   async findOne(id: number) {
-    return this.prisma.post.findUnique({
+    const post = await this.prisma.post.findUnique({
       where: { id },
       include: {
         author: {
@@ -82,6 +98,12 @@ export class PostsService {
         }
       }
     });
+    if (!post) return null;
+    // tags 字段统一为 [{id, name}]
+    return {
+      ...post,
+      tags: post.tags.map(pt => pt.tag)
+    };
   }
 
   async create(data: any) {
@@ -113,7 +135,9 @@ export class PostsService {
     if (coverImage !== undefined) postData.coverImage = coverImage;
     if (viewCount !== undefined) postData.viewCount = viewCount;
     if (likeCount !== undefined) postData.likeCount = likeCount;
-    if (categoryId !== undefined) postData.categoryId = categoryId;
+    if (categoryId !== undefined && categoryId !== null) {
+      postData.category = { connect: { id: categoryId } };
+    }
     if (publishedAt !== undefined) postData.publishedAt = publishedAt;
 
     // 1. 先创建文章
@@ -154,7 +178,9 @@ export class PostsService {
     if (coverImage !== undefined) postData.coverImage = coverImage;
     if (viewCount !== undefined) postData.viewCount = viewCount;
     if (likeCount !== undefined) postData.likeCount = likeCount;
-    if (categoryId !== undefined) postData.categoryId = categoryId;
+    if (categoryId !== undefined && categoryId !== null) {
+      postData.category = { connect: { id: categoryId } };
+    }
     if (publishedAt !== undefined) postData.publishedAt = publishedAt;
 
     // 1. 更新主表

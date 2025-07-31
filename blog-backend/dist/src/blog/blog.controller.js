@@ -21,19 +21,17 @@ let BlogController = class BlogController {
     constructor(blogService) {
         this.blogService = blogService;
     }
-    async getPosts(query) {
+    async getPosts(query, req) {
         const { page = 1, limit = 10, category, tag, search } = query;
+        const userId = req.user?.id;
         return this.blogService.getPublishedPosts({
             page: Number(page),
             limit: Number(limit),
             category,
             tag,
-            search
+            search,
+            userId
         });
-    }
-    async getPost(id, req) {
-        const userId = req.user?.id;
-        return this.blogService.getPostDetail(Number(id), userId);
     }
     async getCategories() {
         return this.blogService.getCategories();
@@ -49,6 +47,19 @@ let BlogController = class BlogController {
     }
     async getLatestPosts(limit = 5) {
         return this.blogService.getLatestPosts(Number(limit));
+    }
+    async getPost(id, req) {
+        console.log('Received post ID:', id, 'Type:', typeof id);
+        if (!id || id === 'undefined' || id === 'null' || id.trim() === '') {
+            throw new Error('文章ID不能为空');
+        }
+        const postId = Number(id);
+        if (isNaN(postId) || postId <= 0) {
+            throw new Error('无效的文章ID格式');
+        }
+        const userId = req.user?.id;
+        console.log('Calling getPostDetail with postId:', postId, 'userId:', userId);
+        return this.blogService.getPostDetail(postId, userId);
     }
     async likePost(id, req) {
         const userId = req.user.id;
@@ -88,20 +99,13 @@ let BlogController = class BlogController {
 exports.BlogController = BlogController;
 __decorate([
     (0, common_1.Get)('posts'),
-    __param(0, (0, common_1.Query)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], BlogController.prototype, "getPosts", null);
-__decorate([
-    (0, common_1.Get)('posts/:id'),
     (0, common_1.UseGuards)(optional_jwt_auth_guard_1.OptionalJwtAuthGuard),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Query)()),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
-], BlogController.prototype, "getPost", null);
+], BlogController.prototype, "getPosts", null);
 __decorate([
     (0, common_1.Get)('categories'),
     __metadata("design:type", Function),
@@ -134,6 +138,15 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], BlogController.prototype, "getLatestPosts", null);
+__decorate([
+    (0, common_1.Get)('posts/:id'),
+    (0, common_1.UseGuards)(optional_jwt_auth_guard_1.OptionalJwtAuthGuard),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], BlogController.prototype, "getPost", null);
 __decorate([
     (0, common_1.Post)('posts/:id/like'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),

@@ -6,8 +6,8 @@ export declare class UsersService {
     constructor(prisma: PrismaService);
     create(createUserDto: CreateUserDto): Promise<{
         roles: {
-            id: number;
             name: string;
+            id: number;
             description: string | null;
             createdAt: Date;
             updatedAt: Date;
@@ -35,8 +35,8 @@ export declare class UsersService {
         users: {
             status: string;
             roles: {
-                id: number;
                 name: string;
+                id: number;
                 description: string | null;
                 createdAt: Date;
                 updatedAt: Date;
@@ -71,8 +71,8 @@ export declare class UsersService {
     findById(id: number): Promise<{
         status: string;
         roles: {
-            id: number;
             name: string;
+            id: number;
             description: string | null;
             createdAt: Date;
             updatedAt: Date;
@@ -144,10 +144,9 @@ export declare class UsersService {
         lastLoginAt: Date | null;
     }>;
     update(id: number, updateUserDto: UpdateUserDto): Promise<{
-        status: string;
         roles: {
-            id: number;
             name: string;
+            id: number;
             description: string | null;
             createdAt: Date;
             updatedAt: Date;
@@ -168,6 +167,7 @@ export declare class UsersService {
         nickname: string | null;
         avatar: string | null;
         bio: string | null;
+        status: import(".prisma/client").$Enums.UserStatus;
         lastLoginAt: Date | null;
     }>;
     updateLastLogin(id: number): Promise<{

@@ -58,7 +58,7 @@ let UsersService = class UsersService {
         const { password, ...result } = user;
         return {
             ...result,
-            roles: [result.role],
+            roles: [{ ...result.role, name: result.role.name.toUpperCase() }],
         };
     }
     async findAll(page, limit, search, status, roleId) {
@@ -100,7 +100,7 @@ let UsersService = class UsersService {
             return {
                 ...userWithoutPassword,
                 status: userWithoutPassword.status.toLowerCase(),
-                roles: [userWithoutPassword.role],
+                roles: [{ ...userWithoutPassword.role, name: userWithoutPassword.role.name.toUpperCase() }],
             };
         });
         return {
@@ -131,7 +131,7 @@ let UsersService = class UsersService {
         return {
             ...result,
             status: result.status.toLowerCase(),
-            roles: [result.role],
+            roles: [{ ...result.role, name: result.role.name.toUpperCase() }],
         };
     }
     async findByEmail(email) {
@@ -174,8 +174,7 @@ let UsersService = class UsersService {
         const { password, ...result } = updatedUser;
         return {
             ...result,
-            status: result.status.toLowerCase(),
-            roles: [result.role],
+            roles: [{ ...result.role, name: result.role.name.toUpperCase() }],
         };
     }
     async updateLastLogin(id) {

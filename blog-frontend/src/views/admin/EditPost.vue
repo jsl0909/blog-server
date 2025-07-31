@@ -137,9 +137,75 @@ const postData = ref<BlogPost | null>(null)
 
 const postId = Number(route.params.id)
 
-if (!postId || isNaN(postId)) {
-  ElMessage.error('无效的文章ID')
-  router.push('/admin/posts')
+onMounted(async () => {
+  if (!postId || isNaN(postId)) {
+    ElMessage.error('无效的文章ID，无法编辑')
+    router.push('/admin/posts')
+    return
+  }
+  loading.value = true
+  try {
+    await loadCategories()
+    await loadTags()
+    await fetchPost()
+  } catch (e) {
+    console.error('编辑页加载异常:', e)
+    ElMessage.error('加载失败')
+    router.push('/admin/posts')
+  } finally {
+    loading.value = false
+  }
+})
+
+// 加载分类
+async function loadCategories() {
+  // 假设 blogApi.getCategories() 返回 [{id, name}]
+  categories.value = await blogApi.getCategories()
+  console.log('分类列表:', categories.value)
+}
+// 加载标签
+async function loadTags() {
+  tags.value = await blogApi.getTags()
+  console.log('标签列表:', tags.value)
+}
+
+// 获取文章详情并回显
+async function fetchPost() {
+  try {
+    const response = await postsApi.getById(postId)
+    const post = response.data || response
+    if (!post) {
+      ElMessage.error('文章不存在')
+      router.push('/admin/posts')
+      return
+    }
+    postData.value = post
+    // 回显表单
+    form.title = post.title || ''
+    form.content = post.content || ''
+    form.excerpt = post.excerpt || ''
+    form.status = post.status?.toLowerCase?.() || 'draft'
+    // 分类回显
+    form.categoryId = post.category?.id ? Number(post.category.id) : undefined
+    // 标签回显（后端已统一为 [{id, name}]）
+    form.tagIds = Array.isArray(post.tags)
+      ? post.tags.map((item: {id: number, name: string}) => item.id)
+      : []
+    console.log('文章详情回显:', {
+      title: form.title,
+      content: form.content,
+      excerpt: form.excerpt,
+      status: form.status,
+      categoryId: form.categoryId,
+      tagIds: form.tagIds,
+      tagsRaw: post.tags
+    })
+  } catch (error) {
+    console.error('获取文章详情失败:', error)
+    ElMessage.error('获取文章详情失败')
+    router.push('/admin/posts')
+    throw error
+  }
 }
 
 // 表单数据
@@ -175,52 +241,6 @@ const formatDate = (dateString: string) => {
 const generateExcerpt = (content: string): string => {
   const text = content.replace(/<[^>]*>/g, '')
   return text.length > 150 ? text.substring(0, 150) + '...' : text
-}
-
-// 获取文章详情
-const fetchPost = async () => {
-  try {
-    const response = await postsApi.getById(postId)
-    // 兼容直接返回对象或 { data: obj }
-    const post = response.data || response
-    if (!post) {
-      ElMessage.error('文章不存在')
-      router.push('/admin/posts')
-      return
-    }
-
-    // --- 调试代码 ---
-    console.log('--- 原始文章数据 ---')
-    console.log(post)
-    console.log('分类(category):', post.category)
-    console.log('标签(tags):', post.tags)
-
-    postData.value = post
-    // 填充表单，强制类型转换，兼容不同结构
-    form.title = post.title
-    form.content = post.content
-    form.excerpt = post.excerpt || ''
-    form.status = post.status?.toLowerCase?.() || 'draft'
-    
-    // --- 重点关注这里的赋值 ---
-    const finalCategoryId = post.category?.id ? Number(post.category.id) : undefined;
-    const finalTagIds = Array.isArray(post.tags)
-      ? post.tags.map((item: any) => Number(item.tag ? item.tag.id : item.id)).filter((id: number) => !isNaN(id))
-      : [];
-
-    form.categoryId = finalCategoryId
-    form.tagIds = finalTagIds
-
-    // --- 调试代码 ---
-    console.log('--- 赋值后 ---')
-    console.log('form.categoryId:', form.categoryId, '(类型:', typeof form.categoryId, ')')
-    console.log('form.tagIds:', form.tagIds)
-
-  } catch (error: any) {
-    console.error('获取文章详情失败:', error)
-    ElMessage.error('获取文章详情失败')
-    router.push('/admin/posts')
-  }
 }
 
 // 提交表单
@@ -298,41 +318,6 @@ const handleDelete = async () => {
     deleting.value = false
   }
 }
-
-// 获取分类列表
-const fetchCategories = async () => {
-  try {
-    categories.value = await blogApi.getCategories()
-  } catch (error) {
-    categories.value = []
-    console.error('获取分类列表失败:', error)
-  }
-}
-
-// 获取标签列表
-const fetchTags = async () => {
-  try {
-    tags.value = await blogApi.getTags()
-  } catch (error) {
-    tags.value = []
-    console.error('获取标签列表失败:', error)
-  }
-}
-
-// 页面初始化
-onMounted(async () => {
-  loading.value = true
-  try {
-    // 先加载分类和标签，再加载文章详情，保证下拉选项已就绪
-    await Promise.all([
-      fetchCategories(),
-      fetchTags()
-    ])
-    await fetchPost()
-  } finally {
-    loading.value = false
-  }
-})
 </script>
 
 <style scoped>

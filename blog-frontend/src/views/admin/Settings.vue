@@ -317,6 +317,7 @@ const handleSave = async () => {
 // 初始化
 onMounted(() => {
   loadSettings()
+  console.log('Settings页面已加载')
 })
 </script>
 

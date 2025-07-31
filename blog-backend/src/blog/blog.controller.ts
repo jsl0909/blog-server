@@ -9,23 +9,18 @@ export class BlogController {
 
   // 获取公开的文章列表（首页、文章列表页）
   @Get('posts')
-  async getPosts(@Query() query: any) {
+  @UseGuards(OptionalJwtAuthGuard)
+  async getPosts(@Query() query: any, @Req() req) {
     const { page = 1, limit = 10, category, tag, search } = query;
+    const userId = req.user?.id;
     return this.blogService.getPublishedPosts({
       page: Number(page),
       limit: Number(limit),
       category,
       tag,
-      search
+      search,
+      userId
     });
-  }
-
-  // 获取文章详情
-  @Get('posts/:id')
-  @UseGuards(OptionalJwtAuthGuard)
-  async getPost(@Param('id') id: string, @Req() req) {
-    const userId = req.user?.id;
-    return this.blogService.getPostDetail(Number(id), userId);
   }
 
   // 获取分类列表
@@ -56,6 +51,27 @@ export class BlogController {
   @Get('posts/latest')
   async getLatestPosts(@Query('limit') limit = 5) {
     return this.blogService.getLatestPosts(Number(limit));
+  }
+
+  // 获取文章详情
+  @Get('posts/:id')
+  @UseGuards(OptionalJwtAuthGuard)
+  async getPost(@Param('id') id: string, @Req() req) {
+    console.log('Received post ID:', id, 'Type:', typeof id);
+    
+    // 验证ID参数
+    if (!id || id === 'undefined' || id === 'null' || id.trim() === '') {
+      throw new Error('文章ID不能为空');
+    }
+    
+    const postId = Number(id);
+    if (isNaN(postId) || postId <= 0) {
+      throw new Error('无效的文章ID格式');
+    }
+    
+    const userId = req.user?.id;
+    console.log('Calling getPostDetail with postId:', postId, 'userId:', userId);
+    return this.blogService.getPostDetail(postId, userId);
   }
 
   // 点赞文章

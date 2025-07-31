@@ -20,6 +20,15 @@ export declare class CategoriesService {
         parentId: number | null;
         sort: number;
     }>;
+    findByName(name: string): Promise<{
+        id: number;
+        name: string;
+        description: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        parentId: number | null;
+        sort: number;
+    }>;
     create(data: any): Promise<{
         id: number;
         name: string;

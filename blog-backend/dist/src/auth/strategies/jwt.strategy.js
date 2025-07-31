@@ -27,6 +27,8 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
     }
     async validate(payload) {
         const user = await this.usersService.findById(payload.sub);
+        console.log('JWT validate payload:', payload);
+        console.log('JWT validate user:', user);
         return {
             id: user.id,
             email: user.email,

@@ -22,6 +22,9 @@ let TagsService = class TagsService {
     async findOne(id) {
         return this.prisma.tag.findUnique({ where: { id } });
     }
+    async findByName(name) {
+        return this.prisma.tag.findUnique({ where: { name } });
+    }
     async create(data) {
         return this.prisma.tag.create({ data });
     }

@@ -24,12 +24,17 @@ export class PostsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePostDto: any) {
-    return this.postsService.update(+id, updatePostDto);
+  @UseGuards(JwtAuthGuard)
+  update(@Param('id') id: string, @Body() updatePostDto: any, @Req() req) {
+    const userId = req.user.id;
+    return this.postsService.update(+id, { ...updatePostDto, userId });
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  @UseGuards(JwtAuthGuard)
+  remove(@Param('id') id: string, @Req() req) {
+    const userId = req.user.id;
+    // 这里可以添加权限检查，确保用户只能删除自己的文章
     return this.postsService.remove(+id);
   }
 } 

@@ -13,6 +13,10 @@ export class CategoriesService {
     return this.prisma.category.findUnique({ where: { id } });
   }
 
+  async findByName(name: string) {
+    return this.prisma.category.findUnique({ where: { name } });
+  }
+
   async create(data: any) {
     return this.prisma.category.create({ data });
   }

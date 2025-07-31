@@ -8,6 +8,14 @@
           <router-link :to="`/categories?id=${post.category.id}`" class="category-link">
             {{ post.category.name }}
           </router-link>
+          <!-- 文章状态标识 -->
+          <span 
+            v-if="post.status !== 'PUBLISHED'" 
+            class="post-status-banner"
+            :class="post.status.toLowerCase()"
+          >
+            {{ getStatusText(post.status) }}
+          </span>
         </div>
         <h1 class="post-title-banner">{{ post.title }}</h1>
         <div class="post-meta-banner">
@@ -69,8 +77,107 @@
                 <el-icon><Share /></el-icon>
                 SHARE
               </el-button>
+              <!-- 编辑按钮 - 只有作者或管理员才能看到 -->
+              <el-button 
+                v-if="canEdit" 
+                class="action-btn edit-btn" 
+                @click="editPost"
+              >
+                <el-icon><EditPen /></el-icon>
+                编辑
+              </el-button>
             </div>
           </footer>
+          
+          <!-- 评论区域 -->
+          <div class="comments-section">
+            <h3 class="comments-title">评论 ({{ comments.length }})</h3>
+            
+            <!-- 发表评论 -->
+            <div v-if="authStore.isAuthenticated" class="comment-form">
+              <el-input
+                v-model="newComment"
+                type="textarea"
+                :rows="3"
+                placeholder="写下你的评论..."
+                maxlength="500"
+                show-word-limit
+              />
+              <div class="comment-form-actions">
+                <el-button 
+                  type="primary" 
+                  @click="submitComment"
+                  :loading="submittingComment"
+                  :disabled="!newComment.trim()"
+                >
+                  发表评论
+                </el-button>
+              </div>
+            </div>
+            
+            <!-- 未登录提示 -->
+            <div v-else class="login-prompt">
+              <p>请 <router-link to="/auth/login">登录</router-link> 后发表评论</p>
+            </div>
+            
+            <!-- 评论列表 -->
+            <div class="comments-list">
+              <div 
+                v-for="comment in comments" 
+                :key="comment.id" 
+                class="comment-item"
+              >
+                <div class="comment-header">
+                  <div class="comment-author">
+                    <el-avatar :size="32" :src="comment.author?.avatar">
+                      {{ comment.author?.nickname || comment.author?.username }}
+                    </el-avatar>
+                    <div class="author-info">
+                      <div class="author-name">
+                        {{ comment.author?.nickname || comment.author?.username }}
+                      </div>
+                      <div class="comment-date">{{ formatDate(comment.createdAt) }}</div>
+                    </div>
+                  </div>
+                  <div class="comment-actions" v-if="canEditComment(comment)">
+                    <el-button 
+                      size="small" 
+                      type="text" 
+                      @click="editComment(comment)"
+                    >
+                      编辑
+                    </el-button>
+                    <el-button 
+                      size="small" 
+                      type="text" 
+                      @click="deleteComment(comment.id)"
+                    >
+                      删除
+                    </el-button>
+                  </div>
+                </div>
+                <div class="comment-content">
+                  <div v-if="editingCommentId === comment.id" class="comment-edit">
+                    <el-input
+                      v-model="comment.content"
+                      type="textarea"
+                      :rows="2"
+                    />
+                    <div class="edit-actions">
+                      <el-button size="small" @click="cancelEdit">取消</el-button>
+                      <el-button size="small" type="primary" @click="saveEdit">保存</el-button>
+                    </div>
+                  </div>
+                  <div v-else class="comment-text">{{ comment.content }}</div>
+                </div>
+              </div>
+              
+              <!-- 空状态 -->
+              <div v-if="comments.length === 0" class="no-comments">
+                <p>暂无评论，快来发表第一条评论吧！</p>
+              </div>
+            </div>
+          </div>
         </div>
         
         <div v-else class="error-state">
@@ -86,17 +193,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { blogApi } from '@/api'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { useAuthStore } from '@/stores/auth'
 import { 
   User, 
   Calendar, 
   Folder, 
   View, 
   ArrowLeft, 
-  Share 
+  Share,
+  EditPen
 } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 import { marked } from 'marked'
@@ -104,12 +213,61 @@ import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
 import type { BlogPost } from '@/types/api'
 
+const authStore = useAuthStore()
+
 const router = useRouter()
 const route = useRoute()
 
 const post = ref<BlogPost | null>(null)
 const loading = ref(false)
 const liking = ref(false)
+const comments = ref<any[]>([])
+const newComment = ref('')
+const submittingComment = ref(false)
+const editingCommentId = ref<number | null>(null)
+
+// 模拟评论数据
+const mockComments = [
+  {
+    id: 1,
+    content: '这篇文章写得很好，对我很有帮助！',
+    createdAt: '2024-01-15T10:30:00Z',
+    author: {
+      id: 2,
+      username: 'reader1',
+      nickname: '技术爱好者',
+      avatar: ''
+    }
+  },
+  {
+    id: 2,
+    content: '感谢分享，学到了很多新知识。',
+    createdAt: '2024-01-14T15:20:00Z',
+    author: {
+      id: 3,
+      username: 'reader2',
+      nickname: '前端开发者',
+      avatar: ''
+    }
+  }
+]
+
+// 计算属性：是否可以编辑文章
+const canEdit = computed(() => {
+  if (!authStore.isAuthenticated || !post.value) return false
+  
+  // 管理员可以编辑所有文章
+  if (authStore.isAdmin) return true
+  
+  // 作者可以编辑自己的文章
+  return post.value.author?.id === authStore.user?.id
+})
+
+// 编辑文章
+const editPost = () => {
+  if (!post.value) return
+  router.push(`/edit/${post.value.id}`)
+}
 
 const formatDate = (dateString: string) => {
   if (!dateString) return ''
@@ -171,24 +329,110 @@ const renderMarkdown = (content: string) => {
   return marked(content)
 }
 
+// 获取状态文本
+const getStatusText = (status: string) => {
+  const statusMap: Record<string, string> = {
+    'DRAFT': '草稿',
+    'PUBLISHED': '已发布',
+    'ARCHIVED': '已归档'
+  }
+  return statusMap[status] || status
+}
+
 const loadPost = async () => {
   const postId = route.params.id
-  if (!postId) return
-  
+  if (!postId || isNaN(Number(postId))) {
+    ElMessage.error('无效的文章ID，无法预览')
+    router.push('/posts')
+    return
+  }
   try {
     loading.value = true
     const data = await blogApi.getPost(Number(postId))
+    if (!data || !data.id) {
+      ElMessage.error('文章不存在或已被删除')
+      router.push('/posts')
+      return
+    }
     post.value = data
   } catch (error) {
     console.error('获取文章详情失败:', error)
-    // 显示错误提示或跳转到404页面
+    ElMessage.error('获取文章详情失败')
+    router.push('/posts')
   } finally {
     loading.value = false
   }
 }
 
+// 评论相关方法
+const submitComment = async () => {
+  if (!newComment.value.trim() || !post.value) return
+  
+  try {
+    submittingComment.value = true
+    // 模拟提交评论
+    const comment = {
+      id: Date.now(),
+      content: newComment.value,
+      createdAt: new Date().toISOString(),
+      author: {
+        id: authStore.user?.id,
+        username: authStore.user?.username,
+        nickname: authStore.user?.nickname,
+        avatar: authStore.user?.avatar
+      }
+    }
+    
+    comments.value.unshift(comment)
+    newComment.value = ''
+    ElMessage.success('评论发表成功')
+  } catch (error) {
+    console.error('发表评论失败:', error)
+    ElMessage.error('发表评论失败')
+  } finally {
+    submittingComment.value = false
+  }
+}
+
+const canEditComment = (comment: any) => {
+  if (!authStore.isAuthenticated) return false
+  if (authStore.isAdmin) return true
+  return comment.author?.id === authStore.user?.id
+}
+
+const editComment = (comment: any) => {
+  editingCommentId.value = comment.id
+}
+
+const deleteComment = async (commentId: number) => {
+  try {
+    await ElMessageBox.confirm('确定要删除这条评论吗？', '确认删除', {
+      type: 'warning'
+    })
+    
+    const index = comments.value.findIndex(c => c.id === commentId)
+    if (index > -1) {
+      comments.value.splice(index, 1)
+      ElMessage.success('删除成功')
+    }
+  } catch {
+    // 用户取消删除
+  }
+}
+
+const cancelEdit = () => {
+  editingCommentId.value = null
+}
+
+const saveEdit = () => {
+  editingCommentId.value = null
+  ElMessage.success('评论更新成功')
+}
+
 onMounted(() => {
   loadPost()
+  // 加载评论数据
+  comments.value = [...mockComments]
 })
 </script>
 
@@ -242,6 +486,27 @@ onMounted(() => {
   clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
   display: inline-block;
   margin-bottom: 15px;
+}
+
+.post-status-banner {
+  display: inline-block;
+  padding: 4px 10px;
+  margin-left: 12px;
+  border-radius: 16px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.post-status-banner.draft {
+  background: rgba(255, 193, 7, 0.9);
+  color: #856404;
+}
+
+.post-status-banner.archived {
+  background: rgba(220, 53, 69, 0.9);
+  color: white;
 }
 
 .post-title-banner {
@@ -321,6 +586,133 @@ onMounted(() => {
 .tag-item:hover {
   background: var(--main-blue);
   border-color: var(--main-blue);
+}
+
+/* 评论区域样式 */
+.comments-section {
+  margin-top: 40px;
+  padding-top: 30px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.comments-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 24px;
+}
+
+.comment-form {
+  margin-bottom: 32px;
+}
+
+.comment-form-actions {
+  margin-top: 16px;
+  text-align: right;
+}
+
+.login-prompt {
+  text-align: center;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.login-prompt a {
+  color: var(--main-blue);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-prompt a:hover {
+  text-decoration: underline;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.comment-item {
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.comment-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.author-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.author-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.comment-date {
+  font-size: 12px;
+  color: #999;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.comment-item:hover .comment-actions {
+  opacity: 1;
+}
+
+.comment-content {
+  margin-top: 8px;
+}
+
+.comment-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #666;
+}
+
+.comment-edit {
+  margin-top: 12px;
+}
+
+.edit-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.no-comments {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+}
+
+.no-comments p {
+  font-size: 16px;
+  margin: 0;
 }
 
 /* 文章正文 */
@@ -417,6 +809,17 @@ onMounted(() => {
 
 .share-btn:hover {
   background-color: var(--main-blue);
+}
+
+.edit-btn {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.edit-btn:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
 }
 
 .error-state :deep(.el-result__title h2),

@@ -473,6 +473,7 @@ const formatDate = (date: string) => {
 onMounted(() => {
   loadRoles()
   loadUsers()
+  console.log('Users页面已加载')
 })
 </script>
 
