@@ -17,13 +17,14 @@ let BlogService = class BlogService {
         this.prisma = prisma;
     }
     async getPublishedPosts(options) {
-        const { page, limit, category, tag, search, userId } = options;
-        const where = {
-            OR: [
-                { status: 'PUBLISHED' },
-                ...(userId ? [{ authorId: userId }] : [])
-            ]
-        };
+        const { page, limit, category, tag, search, userId, myPosts } = options;
+        let where = {};
+        if (myPosts && userId) {
+            where.authorId = userId;
+        }
+        else {
+            where.status = 'PUBLISHED';
+        }
         if (category) {
             where.category = { name: category };
         }
@@ -35,11 +36,21 @@ let BlogService = class BlogService {
             };
         }
         if (search) {
-            where.OR = [
+            const searchConditions = [
                 { title: { contains: search } },
                 { summary: { contains: search } },
                 { content: { contains: search } }
             ];
+            if (where.OR) {
+                where.AND = [
+                    { OR: where.OR },
+                    { OR: searchConditions }
+                ];
+                delete where.OR;
+            }
+            else {
+                where.OR = searchConditions;
+            }
         }
         const skip = (page - 1) * limit;
         const [posts, total] = await Promise.all([

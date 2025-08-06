@@ -100,6 +100,7 @@ import { computed, onMounted, onUnmounted, ref, watch, nextTick } from 'vue'
 import { marked } from 'marked'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/atom-one-dark.css'
+import { useThemeStore } from '@/stores/theme'
 
 // 导入主题样式
 import '@/themes/github.css'
@@ -114,7 +115,8 @@ const emit = defineEmits(['update:modelValue'])
 
 const editorRef = ref<HTMLElement>()
 const showOutline = ref(true)
-const currentTheme = ref('dark')
+const themeStore = useThemeStore()
+const currentTheme = computed(() => themeStore.currentTheme)
 const markdownContent = ref('')
 let isComposing = false
 let isUpdating = false
@@ -462,7 +464,7 @@ const toggleOutline = () => {
 }
 
 const changeTheme = () => {
-  console.log('切换到主题:', currentTheme.value)
+  themeStore.setTheme(currentTheme.value)
 }
 
 // 滚动到指定标题

@@ -22,15 +22,20 @@ let BlogController = class BlogController {
         this.blogService = blogService;
     }
     async getPosts(query, req) {
-        const { page = 1, limit = 10, category, tag, search } = query;
+        const { page = 1, limit = 10, category, tag, search, myPosts } = query;
         const userId = req.user?.id;
+        console.log('getPosts - req.user:', req.user);
+        console.log('getPosts - userId:', userId);
+        console.log('getPosts - query:', query);
+        console.log('getPosts - myPosts:', myPosts);
         return this.blogService.getPublishedPosts({
             page: Number(page),
             limit: Number(limit),
             category,
             tag,
             search,
-            userId
+            userId,
+            myPosts: myPosts === 'true'
         });
     }
     async getCategories() {

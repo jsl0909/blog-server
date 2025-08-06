@@ -5,12 +5,15 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useThemeStore } from '@/stores/theme'
 
 const authStore = useAuthStore()
+const themeStore = useThemeStore()
 
-// 应用启动时初始化认证状态
+// 应用启动时初始化认证状态和主题
 onMounted(() => {
   authStore.initUser()
+  themeStore.loadTheme()
 })
 </script>
 

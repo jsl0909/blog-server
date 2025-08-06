@@ -715,61 +715,226 @@ onMounted(() => {
   margin: 0;
 }
 
-/* 文章正文 */
+/* 文章正文 - Typora风格优化 */
 .post-main {
   line-height: 1.8;
   font-size: 1.1rem;
+  color: #2c3e50;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .post-excerpt blockquote {
   margin: 0 0 30px 0;
-  padding: 20px;
-  background: rgba(10, 10, 10, 0.5);
-  border-left: 4px solid var(--main-blue);
+  padding: 20px 24px;
+  background: #f8f9fa;
+  border-left: 4px solid #667eea;
   font-style: italic;
-  color: #ccc;
+  color: #6c757d;
+  border-radius: 0 8px 8px 0;
 }
 
-.post-body :deep(h1),
-.post-body :deep(h2),
+/* 标题样式 - Typora风格 */
+.post-body :deep(h1) {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 2rem 0 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e9ecef;
+  line-height: 1.3;
+}
+
+.post-body :deep(h2) {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #34495e;
+  margin: 1.8rem 0 1rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid #e9ecef;
+  line-height: 1.4;
+}
+
 .post-body :deep(h3) {
-  margin: 40px 0 20px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #444;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #34495e;
+  margin: 1.5rem 0 0.8rem;
+  line-height: 1.4;
 }
 
+.post-body :deep(h4) {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #34495e;
+  margin: 1.2rem 0 0.6rem;
+  line-height: 1.4;
+}
+
+.post-body :deep(h5) {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #34495e;
+  margin: 1rem 0 0.5rem;
+  line-height: 1.4;
+}
+
+.post-body :deep(h6) {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #34495e;
+  margin: 0.8rem 0 0.4rem;
+  line-height: 1.4;
+}
+
+/* 段落样式 */
 .post-body :deep(p) {
-  margin-bottom: 20px;
+  margin-bottom: 1.2rem;
+  line-height: 1.8;
+  color: #2c3e50;
 }
 
+/* 图片样式 */
 .post-body :deep(img) {
   max-width: 100%;
-  border-radius: 4px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  margin: 1.5rem 0;
 }
 
+/* 代码块样式 - Typora风格 */
 .post-body :deep(pre) {
-  background: #f6f8fa;
-  color: #222;
-  border-radius: 10px;
-  padding: 16px 18px;
-  font-size: 1em;
+  background: #f8f9fa;
+  color: #2c3e50;
+  border-radius: 8px;
+  padding: 1.2rem 1.5rem;
+  font-size: 0.9rem;
   overflow-x: auto;
-  box-shadow: 0 2px 12px rgba(62,198,224,0.08);
-  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin: 1.5rem 0;
+  border: 1px solid #e9ecef;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', monospace;
 }
 
-.post-body code {
-  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
-  font-size: 1em;
-  color: #3ec6e0;
-  background: none;
-  padding: 0 2px;
+/* 行内代码样式 */
+.post-body :deep(code) {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', monospace;
+  font-size: 0.9em;
+  color: #e74c3c;
+  background: #f8f9fa;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
 }
 
-.post-body pre code {
-  color: #222;
+.post-body :deep(pre code) {
+  color: #2c3e50;
   background: none;
   padding: 0;
+  border: none;
+}
+
+/* 列表样式 */
+.post-body :deep(ul),
+.post-body :deep(ol) {
+  margin: 1rem 0;
+  padding-left: 2rem;
+}
+
+.post-body :deep(li) {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.post-body :deep(ul li) {
+  list-style-type: disc;
+  color: #2c3e50;
+}
+
+.post-body :deep(ol li) {
+  list-style-type: decimal;
+  color: #2c3e50;
+}
+
+/* 引用样式 */
+.post-body :deep(blockquote) {
+  margin: 1.5rem 0;
+  padding: 1rem 1.5rem;
+  background: #f8f9fa;
+  border-left: 4px solid #667eea;
+  border-radius: 0 8px 8px 0;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* 表格样式 */
+.post-body :deep(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.post-body :deep(th),
+.post-body :deep(td) {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.post-body :deep(th) {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.post-body :deep(td) {
+  color: #2c3e50;
+}
+
+.post-body :deep(tr:hover) {
+  background: #f8f9fa;
+}
+
+/* 分割线样式 */
+.post-body :deep(hr) {
+  border: none;
+  height: 1px;
+  background: #e9ecef;
+  margin: 2rem 0;
+}
+
+/* 链接样式 */
+.post-body :deep(a) {
+  color: #667eea;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.post-body :deep(a:hover) {
+  color: #5a6fd8;
+  border-bottom-color: #5a6fd8;
+}
+
+/* 强调样式 */
+.post-body :deep(strong) {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.post-body :deep(em) {
+  font-style: italic;
+  color: #2c3e50;
+}
+
+/* 删除线样式 */
+.post-body :deep(del) {
+  color: #6c757d;
+  text-decoration: line-through;
 }
 
 /* 新的文章底部 */

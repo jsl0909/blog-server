@@ -45,7 +45,7 @@ api.interceptors.response.use(
 // 博客API接口
 export const blogApi = {
   // 获取文章列表
-  getPosts: (params?: { page?: number; limit?: number; category?: string; tag?: string; search?: string }): Promise<PostsResponse> =>
+  getPosts: (params?: { page?: number; limit?: number; category?: string; tag?: string; search?: string; userId?: number; myPosts?: string }): Promise<PostsResponse> =>
     api.get('/api/blog/posts', { params }),
 
   // 获取文章详情

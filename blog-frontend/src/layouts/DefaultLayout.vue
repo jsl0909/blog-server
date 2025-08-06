@@ -67,6 +67,10 @@
               <span class="nav-icon">✍️</span>
               <span class="nav-text">写文章</span>
             </router-link>
+            <router-link to="/posts?myPosts=true" class="nav-item" active-class="active" v-if="authStore.isAuthenticated">
+              <span class="nav-icon">📝</span>
+              <span class="nav-text">我的文章</span>
+            </router-link>
             <router-link to="/admin" class="nav-item" active-class="active" v-if="authStore.isAdmin">
               <span class="nav-icon">⚙️</span>
               <span class="nav-text">管理后台</span>
@@ -150,8 +154,13 @@
           </div>
         </div>
 
-        <!-- 用户操作区域 -->
-        <div class="user-actions" v-if="authStore.isAuthenticated">
+        <!-- 主题选择器 -->
+        <div class="theme-section">
+          <ThemeSelector />
+        </div>
+
+        <!-- 用户操作区域/登录注册按钮二选一 -->
+        <div v-if="authStore.isAuthenticated" class="user-actions">
           <el-dropdown @command="handleCommand" placement="top-start">
             <div class="user-menu-trigger">
               <el-icon><Setting /></el-icon>
@@ -175,9 +184,7 @@
             </template>
           </el-dropdown>
         </div>
-
-        <!-- 登录/注册按钮 -->
-        <div class="auth-section" v-else>
+        <div v-else class="auth-section">
           <router-link to="/auth/login" class="auth-btn login-btn">
             <el-icon><User /></el-icon>
             登录
@@ -212,11 +219,6 @@
 
     <!-- 右下角浮动按钮 -->
     <div class="floating-actions">
-      <!-- 语言切换按钮 -->
-      <el-button circle size="large" class="action-btn lang-btn" @click="toggleLanguage">
-        {{ currentLang }}
-      </el-button>
-      
       <!-- 返回顶部按钮 -->
       <el-button circle size="large" class="action-btn back-to-top" @click="scrollToTop" v-show="showBackToTop">
         <el-icon><Top /></el-icon>
@@ -229,13 +231,13 @@
 import { ref, onMounted, onUnmounted, h } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
+import ThemeSelector from '@/components/ThemeSelector.vue'
 import { Search, ArrowDown, User, Setting, SwitchButton, UserFilled, Top, Close } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
 
 const authStore = useAuthStore()
 const router = useRouter()
 const searchQuery = ref('')
-const currentLang = ref('中')
 const showBackToTop = ref(false)
 const showSearchSuggestions = ref(false)
 const searchSuggestions = ref<any[]>([])
@@ -284,10 +286,7 @@ const handleCommand = (command: string) => {
   }
 }
 
-const toggleLanguage = () => {
-  currentLang.value = currentLang.value === '中' ? 'EN' : '中'
-  // 这里可以添加实际的语言切换逻辑
-}
+
 
 const scrollToTop = () => {
   window.scrollTo({
@@ -357,8 +356,9 @@ onUnmounted(() => {
 .layout {
   display: flex;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: var(--bg-color-page);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: all 0.3s ease;
 }
 
 /* 左侧导航栏 */
@@ -374,6 +374,13 @@ onUnmounted(() => {
   top: 0;
   z-index: 1000;
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+/* 深色主题下的侧边栏样式 */
+.theme-night .sidebar {
+  background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
 }
 
 .sidebar-content {
@@ -382,6 +389,29 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 32px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+/* 自定义滚动条样式 */
+.sidebar-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
 }
 
 /* 用户头像区域 */
@@ -659,6 +689,12 @@ onUnmounted(() => {
   overflow: hidden;
 }
 
+/* 主题选择器区域 */
+.theme-section {
+  margin: 20px 0;
+  padding: 0 16px;
+}
+
 /* 用户操作区域 */
 .user-actions {
   margin-top: 24px;
@@ -745,10 +781,11 @@ onUnmounted(() => {
 
 /* 底部版权 */
 .sidebar-footer {
-  margin-top: auto;
+  flex-shrink: 0;
   padding: 20px 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(0, 0, 0, 0.15);
+  margin-top: auto;
 }
 
 .footer-content {
@@ -799,6 +836,8 @@ onUnmounted(() => {
   display: flex;
   justify-content: center;
   padding: 40px 20px;
+  background: var(--bg-color-page);
+  transition: all 0.3s ease;
 }
 
 .content-wrapper {
@@ -827,16 +866,7 @@ onUnmounted(() => {
   transition: all 0.3s ease;
 }
 
-.lang-btn {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-  color: white;
-}
 
-.lang-btn:hover {
-  background: linear-gradient(135deg, #ff5252 0%, #d84315 100%);
-  transform: scale(1.05);
-  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
-}
 
 .back-to-top {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

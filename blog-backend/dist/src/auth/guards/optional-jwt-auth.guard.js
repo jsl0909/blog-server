@@ -11,10 +11,24 @@ const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
 let OptionalJwtAuthGuard = class OptionalJwtAuthGuard extends (0, passport_1.AuthGuard)('jwt') {
     canActivate(context) {
-        return true;
+        const request = context.switchToHttp().getRequest();
+        const token = this.extractTokenFromHeader(request);
+        if (!token) {
+            return true;
+        }
+        return super.canActivate(context);
     }
-    handleRequest(err, user) {
+    handleRequest(err, user, info, context) {
+        if (err || !user) {
+            return undefined;
+        }
+        const request = context.switchToHttp().getRequest();
+        request.user = user;
         return user;
+    }
+    extractTokenFromHeader(request) {
+        const [type, token] = request.headers.authorization?.split(' ') ?? [];
+        return type === 'Bearer' ? token : undefined;
     }
 };
 exports.OptionalJwtAuthGuard = OptionalJwtAuthGuard;

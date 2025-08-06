@@ -30,6 +30,23 @@
       
       <!-- 搜索和筛选 -->
       <div class="filters">
+        <div class="filter-tabs">
+          <button 
+            class="filter-tab" 
+            :class="{ active: !showMyPosts }"
+            @click="showMyPosts = false"
+          >
+            全部文章
+          </button>
+          <button 
+            v-if="authStore.isAuthenticated"
+            class="filter-tab" 
+            :class="{ active: showMyPosts }"
+            @click="showMyPosts = true"
+          >
+            我的文章
+          </button>
+        </div>
         <div class="search-box">
           <input 
             v-model="searchQuery" 
@@ -161,6 +178,7 @@ const currentPage = ref(1)
 const totalPages = ref(1)
 const total = ref(0)
 const selectedCategory = ref<{ id: number; name: string } | null>(null)
+const showMyPosts = ref(false)
 
 const formatDate = (dateString: string) => {
   if (!dateString) return ''
@@ -218,6 +236,12 @@ const loadPosts = async () => {
       params.category = selectedCategory.value.id
     }
     
+    // 如果显示我的文章，添加相关参数
+    if (showMyPosts.value && authStore.isAuthenticated) {
+      params.userId = authStore.user?.id
+      params.myPosts = 'true'
+    }
+    
     const data = await blogApi.getPosts(params)
     posts.value = data.posts || []
     totalPages.value = data.totalPages || 1
@@ -234,6 +258,12 @@ const handleSearch = () => {
   currentPage.value = 1
   loadPosts()
 }
+
+// 监听筛选条件变化
+watch(showMyPosts, () => {
+  currentPage.value = 1
+  loadPosts()
+})
 
 const goToPage = (page: number) => {
   currentPage.value = page
@@ -269,6 +299,12 @@ watch(() => route.query, () => {
   } else {
     selectedCategory.value = null
   }
+  
+  // 处理我的文章参数
+  if (route.query.myPosts === 'true') {
+    showMyPosts.value = true
+  }
+  
   loadPosts()
 }, { immediate: false })
 
@@ -308,6 +344,12 @@ onMounted(() => {
       name: route.query.categoryName as string
     }
   }
+  
+  // 处理我的文章参数
+  if (route.query.myPosts === 'true') {
+    showMyPosts.value = true
+  }
+  
   loadPosts()
 })
 </script>
@@ -429,7 +471,41 @@ onMounted(() => {
 .filters {
   margin-bottom: 40px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 8px;
+  background: #f8f9fa;
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+}
+
+.filter-tab {
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6c757d;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filter-tab:hover {
+  color: #495057;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.filter-tab.active {
+  background: #667eea;
+  color: white;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 .search-box {

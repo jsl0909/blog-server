@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 
 @ApiTags('认证')
 @Controller('auth')
@@ -22,7 +23,7 @@ export class AuthController {
   @ApiResponse({ status: 201, description: '注册成功' })
   @ApiResponse({ status: 400, description: '注册失败' })
   @Post('register')
-  async register(@Body() createUserDto: CreateUserDto) {
-    return this.authService.register(createUserDto);
+  async register(@Body() registerDto: RegisterDto) {
+    return this.authService.register(registerDto);
   }
 } 

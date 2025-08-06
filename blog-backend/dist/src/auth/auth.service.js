@@ -47,15 +47,25 @@ let AuthService = class AuthService {
             },
         };
     }
-    async register(createUserDto) {
-        const existingUser = await this.usersService.findByEmail(createUserDto.email);
+    async register(registerDto) {
+        if (registerDto.password !== registerDto.confirmPassword) {
+            throw new common_1.BadRequestException('两次输入的密码不一致');
+        }
+        const existingUser = await this.usersService.findByEmail(registerDto.email);
         if (existingUser) {
             throw new common_1.UnauthorizedException('邮箱已被使用');
         }
-        const existingUsername = await this.usersService.findByUsername(createUserDto.username);
+        const existingUsername = await this.usersService.findByUsername(registerDto.username);
         if (existingUsername) {
             throw new common_1.UnauthorizedException('用户名已被使用');
         }
+        const createUserDto = {
+            username: registerDto.username,
+            email: registerDto.email,
+            password: registerDto.password,
+            nickname: registerDto.nickname,
+            avatar: registerDto.avatar,
+        };
         const user = await this.usersService.create(createUserDto);
         const payload = { sub: user.id, email: user.email, roles: user.roles };
         return {

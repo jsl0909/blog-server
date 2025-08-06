@@ -1,9 +1,10 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcryptjs';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
@@ -47,10 +48,15 @@ export class AuthService {
     };
   }
 
-  async register(createUserDto: CreateUserDto) {
+  async register(registerDto: RegisterDto) {
+    // 验证密码确认
+    if (registerDto.password !== registerDto.confirmPassword) {
+      throw new BadRequestException('两次输入的密码不一致');
+    }
+
     // 检查邮箱是否已存在
     const existingUser = await this.usersService.findByEmail(
-      createUserDto.email,
+      registerDto.email,
     );
     if (existingUser) {
       throw new UnauthorizedException('邮箱已被使用');
@@ -58,11 +64,20 @@ export class AuthService {
 
     // 检查用户名是否已存在
     const existingUsername = await this.usersService.findByUsername(
-      createUserDto.username,
+      registerDto.username,
     );
     if (existingUsername) {
       throw new UnauthorizedException('用户名已被使用');
     }
+
+    // 创建用户DTO（移除confirmPassword字段）
+    const createUserDto: CreateUserDto = {
+      username: registerDto.username,
+      email: registerDto.email,
+      password: registerDto.password,
+      nickname: registerDto.nickname,
+      avatar: registerDto.avatar,
+    };
 
     // 创建用户
     const user = await this.usersService.create(createUserDto);

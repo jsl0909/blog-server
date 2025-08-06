@@ -13,16 +13,20 @@ export class BlogService {
     tag?: string;
     search?: string;
     userId?: number; // 添加用户ID参数
+    myPosts?: boolean; // 是否只查看我的文章
   }) {
-    const { page, limit, category, tag, search, userId } = options;
+    const { page, limit, category, tag, search, userId, myPosts } = options;
     
-    // 构建查询条件：已发布的文章 + 用户自己的文章（包括未发布的）
-    const where: any = {
-      OR: [
-        { status: 'PUBLISHED' }, // 已发布的文章
-        ...(userId ? [{ authorId: userId }] : []) // 用户自己的文章（包括未发布的）
-      ]
-    };
+    // 构建查询条件
+    let where: any = {};
+    
+    if (myPosts && userId) {
+      // 查看我的文章：只显示用户自己的所有文章（包括未发布的）
+      where.authorId = userId;
+    } else {
+      // 查看全部文章：只显示已发布的文章
+      where.status = 'PUBLISHED';
+    }
 
     // 分类过滤
     if (category) {
@@ -40,11 +44,23 @@ export class BlogService {
 
     // 搜索过滤
     if (search) {
-      where.OR = [
+      // 保持原有的权限隔离逻辑，同时添加搜索条件
+      const searchConditions = [
         { title: { contains: search } },
         { summary: { contains: search } },
         { content: { contains: search } }
       ];
+      
+      // 如果已有OR条件，需要合并
+      if (where.OR) {
+        where.AND = [
+          { OR: where.OR }, // 权限隔离条件
+          { OR: searchConditions } // 搜索条件
+        ];
+        delete where.OR; // 删除原来的OR，使用AND组合
+      } else {
+        where.OR = searchConditions;
+      }
     }
 
     const skip = (page - 1) * limit;
